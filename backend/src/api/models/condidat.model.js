@@ -1,6 +1,7 @@
-const mongoose = require('mongoose');
+module.exports = mongoose => {
+    const Schema = mongoose.Schema;
 
-const CondidatSchema = new mongoose.Schema({
+const CondidatSchema = new Schema({
             
             Nom: { type: String, required: true },
             Prénom: { type: String, required: true },
@@ -23,5 +24,5 @@ CondidatSchema.method('toJSON',function(){
 })
 
 const Condidat = mongoose.model('Condidat', CondidatSchema);
-
-module.exports = Condidat;
+return Condidat;
+}

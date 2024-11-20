@@ -1,6 +1,7 @@
-const mongoose = require('mongoose');
+module.exports = mongoose => {
+    const Schema = mongoose.Schema;
 
-const StagiaireSchema = new mongoose.Schema({
+const StagiaireSchema = new Schema({
            
             Nom: { type: String, required: true },
             Prénom: { type: String, required: true },
@@ -19,5 +20,5 @@ StagiaireSchema.method('toJSON',function(){
     return object;
 })
 const Stagiaire = mongoose.model('Stagiaire', StagiaireSchema);
-
-module.exports = Stagiaire;
+return Stagiaire;
+}

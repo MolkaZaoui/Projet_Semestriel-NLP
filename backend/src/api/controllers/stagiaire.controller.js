@@ -8,27 +8,28 @@ exports.create = (req, res) => {
     }
 
     const newStagiaire = new Stagiaire({
-        Nom,
-        Prénom,
-        Adresse_mail,
-        N_de_Tel,
-        Ecole,
-        Specialite,
-        Motivation,
-        Cv
+        Nom: Nom,
+        Prénom: Prénom,
+        Adresse_mail: Adresse_mail,
+        N_de_Tel: N_de_Tel,
+        Ecole: Ecole,
+        Specialite: Specialite,
+        Motivation: Motivation,
+        Cv: Cv
 
     });
 
     newStagiaire.save()
         .then(() => res.status(200).send({ message: 'Successfully created intern' }))
         .catch(err => {
+            console.log(err);
             console.error(err);
             res.status(500).send({ message: 'Error while creating the intern' });
         });
 };
 
 exports.findAll = (req, res) => {
-    Condidat.find({})
+    Stagiaire.find({})
         .then(data => res.send(data))
         .catch(err => {
             console.log(err);
