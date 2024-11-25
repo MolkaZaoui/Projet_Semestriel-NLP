@@ -1,11 +1,45 @@
 const db = require('../../database/db.config');
 const Stagiaire = db.stagiaire;
+const multer = require('multer'); 
+const path = require('path')
 
-exports.create = (req, res) => {
-    const { Nom, Prénom,Adresse_mail,N_de_Tel,   Ecole, Specialite,Motivation,Cv} = req.body;
-    if (!Nom|| !Prénom || !Adresse_mail|| !N_de_Tel || !Ecole || !Specialite ||!Motivation|| !Cv ) {
+
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/'); // Dossier où les fichiers sont stockés
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + file.originalnamegit;
+        cb(null, uniqueSuffix + path.extname(file.originalname)); // Nom unique pour chaque fichier
+    }
+});
+
+const upload = multer({ storage: storage,
+    limits: {
+        fileSize: 10* 1024 * 1024
+    },
+    fileFilter: (req, file, cb) => {
+        // Vérifiez que le fichier est bien un PDF
+        if (!file.originalname.match(/\.(pdf)$/)) {
+            return cb(new Error('Only PDF files are allowed!'), false);
+        }
+        cb(null, true);
+    }
+});
+console.log(upload);
+
+exports.upload = upload;
+
+exports.create = [
+    upload.single('Cv'),
+    (req, res) => {
+    const { Nom, Prénom,Adresse_mail,N_de_Tel,   Ecole, Specialite,Motivation} = req.body;
+    if (!Nom|| !Prénom || !Adresse_mail|| !N_de_Tel || !Ecole || !Specialite ||!Motivation|| !req.file ) {
         return res.status(400).send({ message: 'Content cannot be empty' });
     }
+
+    const Cv = req.file.path;
 
     const newStagiaire = new Stagiaire({
         Nom: Nom,
@@ -26,7 +60,8 @@ exports.create = (req, res) => {
             console.error(err);
             res.status(500).send({ message: 'Error while creating the intern' });
         });
-};
+}
+];
 
 exports.findAll = (req, res) => {
     Stagiaire.find({})

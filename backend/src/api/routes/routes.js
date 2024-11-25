@@ -3,8 +3,10 @@ module.exports = app =>{
     const stagiaireController= require('../controllers/stagiaire.controller');
     const condidatController= require('../controllers/condidat.controller');
     
+    router.post('/stagiaires', stagiaireController.upload.single('Cv'), stagiaireController.create);
 
-    router.post('/stagiaire/create', stagiaireController.create);
+
+    //router.post('/stagiaire/create', stagiaireController.create);
     router.get('/stagiaire', stagiaireController.findAll);
     router.get('/stagiaire/:id', stagiaireController.findById);
     router.put('/stagiaire/edit/:id', stagiaireController.updateById );
