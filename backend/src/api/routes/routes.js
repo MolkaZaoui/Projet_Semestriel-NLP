@@ -1,8 +1,16 @@
 module.exports = app =>{
-    const router = require('express').Router();
+    const express = require('express');
+    const router = express.Router();    
     const stagiaireController= require('../controllers/stagiaire.controller');
     const condidatController= require('../controllers/condidat.controller');
     
+
+    router.post('/condidats', condidatController.create);
+
+    router.get('/condidat', condidatController.findAll);
+    router.get('/condidat/:id', condidatController.findById);
+    router.put('/condidat/edit/:id', condidatController.updateById );
+
 
     router.post('/stagiaire/create', stagiaireController.create);
     router.get('/stagiaire', stagiaireController.findAll);
@@ -10,11 +18,7 @@ module.exports = app =>{
     router.put('/stagiaire/edit/:id', stagiaireController.updateById );
 
 
-    router.post('/condidat/create', condidatController.create);
-    router.get('/condidat', condidatController.findAll);
-    router.get('/condidat/:id', condidatController.findById);
-    router.put('/condidat/edit/:id', condidatController.updateById );
-
+ 
 
   
 
