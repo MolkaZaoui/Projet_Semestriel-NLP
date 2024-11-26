@@ -12,4 +12,4 @@ db.url=config.DB_URL;
 db.condidat=require('../api/models/condidat.model')(mongoose);
 db.stagiaire=require('../api/models/Stagiaire.model')(mongoose);
 
-module.exports = db;
+module.exports = { db }; 

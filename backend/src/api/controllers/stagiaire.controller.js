@@ -1,69 +1,59 @@
-const db = require('../../database/db.config');
+import { uploadPDF } from './file.controller.js';
+import { db } from '../../database/db.config.js';
 const Stagiaire = db.stagiaire;
-const multer = require('multer'); 
-const path = require('path')
+import multer from 'multer';
 
 
+// Multer storage configuration
+const storage = multer.memoryStorage(); // Store files in memory
+const upload = multer({ storage: storage });
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // Dossier où les fichiers sont stockés
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + file.originalnamegit;
-        cb(null, uniqueSuffix + path.extname(file.originalname)); // Nom unique pour chaque fichier
-    }
-});
 
-const upload = multer({ storage: storage,
-    limits: {
-        fileSize: 10* 1024 * 1024
-    },
-    fileFilter: (req, file, cb) => {
-        // Vérifiez que le fichier est bien un PDF
-        if (!file.originalname.match(/\.(pdf)$/)) {
-            return cb(new Error('Only PDF files are allowed!'), false);
+export const Create=async (req, res)=> {
+    upload.single('file')(req, res, async (err) => {
+        if (err) {
+            return res.status(500).send({ message: 'Error during file upload', error: err.message });
         }
-        cb(null, true);
-    }
-});
-console.log(upload);
 
-exports.upload = upload;
+    
+    const { Nom, prenom,Adresse_mail,N_de_Tel,ecole, Specialite,Motivation} = req.body;
+    console.log(Nom, prenom, Adresse_mail, N_de_Tel, ecole, Specialite,Motivation, req.file);
 
-exports.create = [
-    upload.single('Cv'),
-    (req, res) => {
-    const { Nom, Prénom,Adresse_mail,N_de_Tel,   Ecole, Specialite,Motivation} = req.body;
-    if (!Nom|| !Prénom || !Adresse_mail|| !N_de_Tel || !Ecole || !Specialite ||!Motivation|| !req.file ) {
+    if (!Nom|| !prenom || !Adresse_mail|| !N_de_Tel || !ecole || !Specialite ||!Motivation|| !req.file ) {
         return res.status(400).send({ message: 'Content cannot be empty' });
     }
 
-    const Cv = req.file.path;
+    try {
+        // Upload the CV to Cloudinary (using the buffer from multer)
+        const uploadedCV = await uploadPDF(req.file); // Now this will work properly
+        console.log(uploadedCV); // You should see the Cloudinary URL here
+        
+        // Create a new candidate entry
 
     const newStagiaire = new Stagiaire({
-        Nom: Nom,
-        Prénom: Prénom,
-        Adresse_mail: Adresse_mail,
-        N_de_Tel: N_de_Tel,
-        Ecole: Ecole,
-        Specialite: Specialite,
-        Motivation: Motivation,
-        Cv: Cv
+        Nom,
+        Prénom: prenom,
+        Adresse_mail,
+        N_de_Tel,
+        Ecole: ecole,
+        Specialite,
+        Motivation,
+        Cv: uploadedCV.secure_url
 
     });
 
-    newStagiaire.save()
-        .then(() => res.status(200).send({ message: 'Successfully created intern' }))
-        .catch(err => {
-            console.log(err);
-            console.error(err);
-            res.status(500).send({ message: 'Error while creating the intern' });
-        });
-}
-];
+     // Save the candidate in the database
+     await newStagiaire.save();
 
-exports.findAll = (req, res) => {
+     res.status(201).send({ message: 'Stagiaire created successfully' });
+ } catch (error) {
+     console.error('Error while saving stagiaire:', error);
+     res.status(500).send({ message: 'Error saving stagiaire' });
+ }
+});
+};
+
+export const FindAll = (req, res) => {
     Stagiaire.find({})
         .then(data => res.send(data))
         .catch(err => {
@@ -72,7 +62,7 @@ exports.findAll = (req, res) => {
         });
 };
 
-exports.findById = (req, res) => {
+export const FindById = (req, res) => {
     const id = req.params.id;
     Stagiaire.findById(id)
         .then(stagiaire=> {
@@ -88,15 +78,15 @@ exports.findById = (req, res) => {
 };
 
 
-exports.updateById = (req, res) => {
+export const UpdateById = (req, res) => {
     const id = req.params.id;
     if (!req.body) {
         return res.status(400).send({ message: 'Data to update cannot be empty' });
     }
-    const { Nom, Prénom,Adresse_mail,N_de_Tel,   Ecole, Specialite,Motivation,Cv } = req.body;
+    const { Nom, Prenom,Adresse_mail,N_de_Tel,   Ecole, Specialite,Motivation,Cv } = req.body;
     const updatedStagiaire = {
         Nom,
-        Prénom,
+        Prenom,
         Adresse_mail,
         N_de_Tel,
         Ecole,
